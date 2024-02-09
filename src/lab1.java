@@ -59,6 +59,7 @@ public class lab1 {
     private static final String FILE_PATH = "E:\\SSCD\\LAB1\\assemblerCode.txt";
     private static final String START_OPCODE = "START";
     private static final String END_OPCODE = "END";
+    private static final String ORIGIN_OPCODE = "ORIGIN";
     private static final String DS_OPCODE = "DS";
     private static Integer locationCounter;
 
@@ -144,10 +145,47 @@ public class lab1 {
                     processConstant(nextToken);
                 } else if (token.equals(DS_OPCODE)) {
                     Instruction instruction = opcodeTable.get(token);
-                    System.out.print(locationCounter +" (" + instruction.getOpcodeType() + " , " + instruction.getOpcodeValue() + ")");
+                    System.out.print(locationCounter + " (" + instruction.getOpcodeType() + " , " + instruction.getOpcodeValue() + ")");
                     String nextToken = tokenizer.nextToken();
                     locationCounter = locationCounter + Integer.parseInt(nextToken);
                     processConstant(nextToken);
+                } else if (token.equals(ORIGIN_OPCODE)) {
+                    Instruction instruction = opcodeTable.get(token);
+                    System.out.print("(" + instruction.getOpcodeType() + " , " + instruction.getOpcodeValue() + ")");
+                    String nextToken = tokenizer.nextToken();
+                    processSymbol(nextToken,symbolTable);
+                    String address = symbolTable.get(nextToken);
+                    if (address != null) {
+                        try {
+                            int addressInt =  Integer.valueOf(address);
+                            String operator = tokenizer.nextToken();
+                            int operandInt = Integer.parseInt(tokenizer.nextToken());
+                            int result = 0;
+                            switch (operator) {
+                                case "+":
+                                    result = addressInt + operandInt;
+                                    break;
+                                case "-":
+                                    result = addressInt - operandInt;
+                                    break;
+                                case "*":
+                                    result = addressInt * operandInt;
+                                    break;
+                                case "/":
+                                    if (operandInt != 0) {
+                                        result = addressInt / operandInt;
+                                    } else {
+                                        System.out.print(" Error: Division by zero.");
+                                    }
+                                    break;
+                            }
+                            locationCounter = result;
+                        } catch (NumberFormatException e) {
+                            System.out.print("Error: Invalid address format.");
+                        }
+                    } else {
+                        System.out.print("Error: Symbol not found in symbol table.");
+                    }
                 } else if (token.equals(END_OPCODE)) {
                     Instruction instruction = opcodeTable.get(token);
                     System.out.print("(" + instruction.getOpcodeType() + " , " + instruction.getOpcodeValue() + ")");
@@ -171,7 +209,7 @@ public class lab1 {
                         symbolTable.put(token, "-1");
                     }
                     int index = new ArrayList<>(symbolTable.keySet()).indexOf(token);
-                    index = index+1;
+                    index = index + 1;
                     System.out.print("(S , " + index + ")");
                 } else {
                     symbolTable.put(token, String.valueOf(locationCounter));
@@ -181,8 +219,13 @@ public class lab1 {
         System.out.println();
     }
 
-    private static void processConstant(String token){
+    private static void processConstant(String token) {
         System.out.print("(C , " + token + ")");
+    }
+    private static void processSymbol(String token, HashMap<String, String> symbolTable) {
+        int index = new ArrayList<>(symbolTable.keySet()).indexOf(token);
+        index = index + 1;
+        System.out.print("(S , " + index + ")");
     }
 
     private static void printSymbolTable(Map<String, String> symbolTable) {
