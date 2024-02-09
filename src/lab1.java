@@ -157,7 +157,7 @@ public class lab1 {
                     String address = symbolTable.get(nextToken);
                     if (address != null) {
                         try {
-                            int addressInt =  Integer.valueOf(address);
+                            int addressInt =  Integer.parseInt(address);
                             String operator = tokenizer.nextToken();
                             int operandInt = Integer.parseInt(tokenizer.nextToken());
                             int result = 0;
