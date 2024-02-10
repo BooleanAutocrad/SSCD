@@ -1,5 +1,6 @@
 import java.io.File;
 import java.util.*;
+import java.util.function.BiFunction;
 
 enum OpcodeType {
     IS, DL, AD
@@ -71,10 +72,12 @@ public class lab1 {
         HashMap<String, Register> regTable = new HashMap<>();
         HashMap<String, Condition> conditionTable = new HashMap<>();
         HashMap<String, String> symbolTable = new HashMap<>();
+        Map<String, BiFunction<Integer, Integer, Integer>> operationMap = new HashMap<>();
 
-        initializeTables(opcodeTable, regTable, conditionTable);
 
-        processFile(opcodeTable, regTable, symbolTable);
+        initializeTables(opcodeTable, regTable, conditionTable, operationMap);
+
+        processFile(opcodeTable, regTable, symbolTable,operationMap);
 
         System.out.println("Complete Symbol Table:");
         printSymbolTable(symbolTable);
@@ -82,7 +85,8 @@ public class lab1 {
 
     private static void initializeTables(HashMap<String, Instruction> opcodeTable,
                                          HashMap<String, Register> regTable,
-                                         HashMap<String, Condition> conditionTable) {
+                                         HashMap<String, Condition> conditionTable,
+                                         Map<String, BiFunction<Integer, Integer, Integer>> operationMap) {
         opcodeTable.put("STOP", new Instruction("00", OpcodeType.IS));
         opcodeTable.put("ADD", new Instruction("01", OpcodeType.IS));
         opcodeTable.put("SUB", new Instruction("02", OpcodeType.IS));
@@ -113,15 +117,28 @@ public class lab1 {
         conditionTable.put("GT", new Condition("4"));
         conditionTable.put("GE", new Condition("5"));
         conditionTable.put("ANY(NE)", new Condition("6"));
+
+        operationMap.put("+", Integer::sum);
+        operationMap.put("-", (a, b) -> a - b);
+        operationMap.put("*", (a, b) -> a * b);
+        operationMap.put("/", (a, b) -> {
+            if (b != 0) {
+                return a / b;
+            } else {
+                System.out.print(" Error: Division by zero.");
+                return 0;
+            }
+        });
     }
 
     private static void processFile(HashMap<String, Instruction> opcodeTable,
                                     HashMap<String, Register> regTable,
-                                    HashMap<String, String> symbolTable) {
+                                    HashMap<String, String> symbolTable,
+                                    Map<String, BiFunction<Integer, Integer, Integer>> operationMap) {
         try (Scanner scanner = new Scanner(new File(FILE_PATH))) {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
-                processLine(line, opcodeTable, regTable, symbolTable);
+                processLine(line, opcodeTable, regTable, symbolTable,operationMap);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -130,7 +147,8 @@ public class lab1 {
 
     private static void processLine(String line, HashMap<String, Instruction> opcodeTable,
                                     HashMap<String, Register> regTable,
-                                    HashMap<String, String> symbolTable) {
+                                    HashMap<String, String> symbolTable,
+                                    Map<String, BiFunction<Integer, Integer, Integer>> operationMap) {
 
 
         StringTokenizer tokenizer = new StringTokenizer(line, " ");
@@ -169,26 +187,7 @@ public class lab1 {
                             int addressInt =  Integer.parseInt(address);
                             String operator = tokenizer.nextToken();
                             int operandInt = Integer.parseInt(tokenizer.nextToken());
-                            int result = 0;
-                            switch (operator) {
-                                case "+":
-                                    result = addressInt + operandInt;
-                                    break;
-                                case "-":
-                                    result = addressInt - operandInt;
-                                    break;
-                                case "*":
-                                    result = addressInt * operandInt;
-                                    break;
-                                case "/":
-                                    if (operandInt != 0) {
-                                        result = addressInt / operandInt;
-                                    } else {
-                                        System.out.print(" Error: Division by zero.");
-                                    }
-                                    break;
-                            }
-                            locationCounter = result;
+                            locationCounter = operationMap.get(operator).apply(addressInt, operandInt);
                         } catch (NumberFormatException e) {
                             System.out.print("Error: Invalid address format.");
                         }
