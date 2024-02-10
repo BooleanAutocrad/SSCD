@@ -60,8 +60,10 @@ public class lab1 {
     private static final String START_OPCODE = "START";
     private static final String END_OPCODE = "END";
     private static final String ORIGIN_OPCODE = "ORIGIN";
+    private static final String EQU_OPCODE = "EQU";
     private static final String DS_OPCODE = "DS";
     private static Integer locationCounter;
+    private static String tokenAtLabelSide;
 
 
     public static void main(String[] args) {
@@ -143,6 +145,13 @@ public class lab1 {
                     Instruction instruction = opcodeTable.get(token);
                     System.out.print("    (" + instruction.getOpcodeType() + " , " + instruction.getOpcodeValue() + ")");
                     processConstant(nextToken);
+                } else if (token.equals(EQU_OPCODE)) {
+                    Instruction instruction = opcodeTable.get(token);
+                    System.out.print("    (" + instruction.getOpcodeType() + " , " + instruction.getOpcodeValue() + ")");
+                    String nextToken = tokenizer.nextToken();
+                    processSymbol(nextToken,symbolTable);
+                    String address = symbolTable.get(nextToken);
+                    symbolTable.put(tokenAtLabelSide, address);
                 } else if (token.equals(DS_OPCODE)) {
                     Instruction instruction = opcodeTable.get(token);
                     System.out.print(locationCounter + " (" + instruction.getOpcodeType() + " , " + instruction.getOpcodeValue() + ")");
@@ -211,6 +220,7 @@ public class lab1 {
                     processSymbol(token,symbolTable);
                 } else {
                     symbolTable.put(token, String.valueOf(locationCounter));
+                    tokenAtLabelSide = token;
                 }
             }
         }
