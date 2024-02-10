@@ -141,7 +141,7 @@ public class lab1 {
                     String nextToken = tokenizer.nextToken();
                     locationCounter = Integer.valueOf(nextToken);
                     Instruction instruction = opcodeTable.get(token);
-                    System.out.print("(" + instruction.getOpcodeType() + " , " + instruction.getOpcodeValue() + ")");
+                    System.out.print("    (" + instruction.getOpcodeType() + " , " + instruction.getOpcodeValue() + ")");
                     processConstant(nextToken);
                 } else if (token.equals(DS_OPCODE)) {
                     Instruction instruction = opcodeTable.get(token);
@@ -151,7 +151,7 @@ public class lab1 {
                     processConstant(nextToken);
                 } else if (token.equals(ORIGIN_OPCODE)) {
                     Instruction instruction = opcodeTable.get(token);
-                    System.out.print("(" + instruction.getOpcodeType() + " , " + instruction.getOpcodeValue() + ")");
+                    System.out.print("    (" + instruction.getOpcodeType() + " , " + instruction.getOpcodeValue() + ")");
                     String nextToken = tokenizer.nextToken();
                     processSymbol(nextToken,symbolTable);
                     String address = symbolTable.get(nextToken);
@@ -188,7 +188,7 @@ public class lab1 {
                     }
                 } else if (token.equals(END_OPCODE)) {
                     Instruction instruction = opcodeTable.get(token);
-                    System.out.print("(" + instruction.getOpcodeType() + " , " + instruction.getOpcodeValue() + ")");
+                    System.out.print("    (" + instruction.getOpcodeType() + " , " + instruction.getOpcodeValue() + ")");
                 } else {
                     if (locationCounter != null) {
                         Instruction instruction = opcodeTable.get(token);
@@ -208,9 +208,7 @@ public class lab1 {
                     if (!symbolTable.containsKey(token)) {
                         symbolTable.put(token, "-1");
                     }
-                    int index = new ArrayList<>(symbolTable.keySet()).indexOf(token);
-                    index = index + 1;
-                    System.out.print("(S , " + index + ")");
+                    processSymbol(token,symbolTable);
                 } else {
                     symbolTable.put(token, String.valueOf(locationCounter));
                 }
